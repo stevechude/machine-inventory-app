@@ -1,24 +1,48 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import CreateMachine from "./components/CreateMachine";
+import ListMachines from "./components/ListMachines";
+import Navbar from "./components/Navbar";
+import { useCustomState } from "./CustomHooks/Hooks";
 
 function App() {
+  const { machines, setMachines } = useCustomState();
+
+  // A useEffect hook to retrieve and display all stored
+  // machine data from Local Storage API.
+  useEffect(() => {
+    const temp = localStorage.getItem("machines");
+    const storedMachines = JSON.parse(temp);
+
+    if (storedMachines) {
+      setMachines(storedMachines);
+    }
+  }, [setMachines]);
+
+  // A useEffect hook to store all machine data in Local Storage
+  useEffect(() => {
+    const temp = JSON.stringify(machines);
+    localStorage.setItem("machines", temp);
+  }, [machines]);
+
+  // Function to add a machine created
+  const createMachine = (machine) => {
+    setMachines([...machines, { machine }]);
+  };
+
+  // Function to delete a machine
+  const deleteMachine = (name) => {
+    const filteredMachines = machines.filter(({ machine }) => {
+      return machine.name !== name;
+    });
+    setMachines(filteredMachines);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Navbar />
+      <CreateMachine onCreate={createMachine} />
+      <ListMachines machines={machines} onDelete={deleteMachine} />
+    </>
   );
 }
 
